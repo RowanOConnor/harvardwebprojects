@@ -50,7 +50,7 @@ def login():
             return apology("must provide password")
 
         # query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = :username", username=request.form.get("username"))
+        rows = db.execute("SELECT * FROM \"users\" WHERE username = :username", username=request.form.get("username"))
 
         # ensure username exists and password is correct
         if len(rows) != 1 or not pwd_context.verify(request.form.get("password"), rows[0]["hash"]):
@@ -113,11 +113,11 @@ def register():
             hash = pwd_context.hash(str(prompt_vals["password"]))
             
             try:
-                last_id = db.execute("SELECT id FROM 'users' ORDER BY id DESC LIMIT 1;")[0]["id"]
+                last_id = db.execute("SELECT id FROM \"users\" ORDER BY id DESC LIMIT 1;")[0]["id"]
             except:
                 last_id = 0
             
-            db.execute("INSERT INTO 'users' " + \
+            db.execute("INSERT INTO \"users\" " + \
                        "(id, username, hash, firstname, lastname, email, dob, address, city, state, zip, cash) " + \
                        "VALUES (:id, :username, :hash, :firstname, :lastname, :email, :dob, :address, :city, :state, :zip, 10000);",
                        id=last_id + 1,
@@ -148,7 +148,7 @@ def register():
 @login_required
 def index():
     if request.method == "GET":
-        stocks_raw = db.execute("SELECT * FROM 'shares' WHERE id = :id", id=session["user_id"])
+        stocks_raw = db.execute("SELECT * FROM \"shares\" WHERE id = :id", id=session["user_id"])
         
         # Create a new list of stocks, removing duplicates
         stocks = []
@@ -183,7 +183,7 @@ def index():
             stocks[num]["price"] = usd(stocks[num]["price"])
             stocks[num]["total_price"] = usd(stocks[num]["total_price"])
         
-        user_cash = db.execute("SELECT * FROM 'users' WHERE id = :user_id", user_id=session["user_id"])[0]["cash"]
+        user_cash = db.execute("SELECT * FROM \"users\" WHERE id = :user_id", user_id=session["user_id"])[0]["cash"]
         
         return render_template("index.html", stocks=stocks, user_cash=usd(user_cash), portfolio_val=usd(portfolio_val + user_cash))
     return apology("Not using the GET method")
@@ -217,7 +217,7 @@ def buy():
     if request.method == "POST":
         
         user_id = session["user_id"]
-        user_cash = db.execute("SELECT * FROM 'users' WHERE id = :user_id", user_id=user_id)[0]["cash"]
+        user_cash = db.execute("SELECT * FROM \"users\" WHERE id = :user_id", user_id=user_id)[0]["cash"]
         
         symbol = request.form.get("symbol").upper()
         try:
@@ -244,7 +244,7 @@ def buy():
             user_cash -= total_price
             
             # log a transaction
-            db.execute("INSERT INTO 'transactions' " + \
+            db.execute("INSERT INTO \"transactions\" " + \
                        "(id, type, symbol, quantity, price) " + \
                        "VALUES (:id, :type, :symbol, :quantity, :price)",
                        id=user_id,
@@ -253,13 +253,13 @@ def buy():
                        quantity=quantity,
                        price=price)
                  
-            rows = db.execute("SELECT * FROM 'shares' WHERE id = :id AND symbol = :symbol",
+            rows = db.execute("SELECT * FROM \"shares\" WHERE id = :id AND symbol = :symbol",
                               id=user_id,
                               symbol=symbol)
                               
             # if user doesn't own any stock from this company, add a new row to the table
             if len(rows) == 0:
-                db.execute("INSERT INTO 'shares' " + \
+                db.execute("INSERT INTO \"shares\" " + \
                            "(id, symbol, quantity) " + \
                            "VALUES (:id, :symbol, :quantity)",
                            id=user_id,
@@ -268,7 +268,7 @@ def buy():
             
             # else user already owns stocks from this company, increment value  
             else:
-                db.execute("UPDATE 'shares' SET quantity = :quantity WHERE id = :id AND symbol = :symbol",
+                db.execute("UPDATE \"shares\" SET quantity = :quantity WHERE id = :id AND symbol = :symbol",
                            id=user_id,
                            symbol=symbol,
                            quantity=rows[0]["quantity"] + quantity)
@@ -277,7 +277,7 @@ def buy():
             # if users already owns stocks from this company, increment value
             
             # change the user's cash
-            db.execute("UPDATE 'users' SET cash = :cash WHERE id = :id", cash=user_cash, id=user_id)
+            db.execute("UPDATE \"users\" SET cash = :cash WHERE id = :id", cash=user_cash, id=user_id)
             
             # go back to the index page
             flash("Bought!")
@@ -300,7 +300,7 @@ def sell():
     if request.method == "POST":
         
         user_id = session["user_id"]
-        user_cash = db.execute("SELECT * FROM 'users' WHERE id = :user_id", user_id=user_id)[0]["cash"]
+        user_cash = db.execute("SELECT * FROM \"users\" WHERE id = :user_id", user_id=user_id)[0]["cash"]
         
         symbol = request.form.get("symbol").upper()
         try:
@@ -323,7 +323,7 @@ def sell():
             
         total_price = price * quantity
         
-        rows = db.execute("SELECT * FROM 'shares' WHERE id = :id AND symbol = :symbol",
+        rows = db.execute("SELECT * FROM \"shares\" WHERE id = :id AND symbol = :symbol",
                               id=user_id,
                               symbol=symbol)
         
@@ -336,7 +336,7 @@ def sell():
             user_cash += total_price
             
             # log a transaction
-            db.execute("INSERT INTO 'transactions' " + \
+            db.execute("INSERT INTO \"transactions\" " + \
                        "(id, type, symbol, quantity, price) " + \
                        "VALUES (:id, :type, :symbol, :quantity, :price)",
                        id=user_id,
@@ -347,18 +347,18 @@ def sell():
                  
             # if user owns more than is selling, update the quantity
             if quantity < owned_quantity:
-                db.execute("UPDATE 'shares' SET quantity = :quantity WHERE id = :id AND symbol = :symbol",
+                db.execute("UPDATE \"shares\" SET quantity = :quantity WHERE id = :id AND symbol = :symbol",
                           id=user_id,
                           symbol=symbol,
                           quantity=owned_quantity - quantity)
             
             else:
-                db.execute("DELETE FROM 'shares' WHERE id = :id AND symbol = :symbol",
+                db.execute("DELETE FROM \"shares\" WHERE id = :id AND symbol = :symbol",
                            id=user_id,
                            symbol=symbol)
             
             # change the user's cash
-            db.execute("UPDATE 'users' SET cash = :cash WHERE id = :id", cash=user_cash, id=session["user_id"])
+            db.execute("UPDATE \"users\" SET cash = :cash WHERE id = :id", cash=user_cash, id=session["user_id"])
             
             # go back to the index page
             flash("Sold!")
@@ -376,7 +376,7 @@ def sell():
 @login_required
 def history():
     user_id = session["user_id"]
-    transactions = db.execute("SELECT * FROM 'transactions' WHERE id = :id", id=session["user_id"])
+    transactions = db.execute("SELECT * FROM \"transactions\" WHERE id = :id", id=session["user_id"])
     
     for num, transaction in enumerate(transactions):
         data = lookup(transaction["symbol"])
