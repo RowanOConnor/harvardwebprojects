@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Get Quotes
+{% endblock %}
+
+{% block main %}
+    <form action="{{ url_for('sell') }}" method="post">
+        <fieldset>
+            <!-- reminder -->
+            {% if reminder %}
+            <div class="form-group">
+                Please complete all fields and enter a valid stock symbol.<br>
+                Make sure you are entering a positive integer in the quantity field.<br>
+                You cannot choose to sell more stocks than you own.
+            </div>
+            {% endif %}
+            
+            <!-- symbol -->
+            <div class="form-group">
+                <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Stock Symbol" type="text"/>
+            </div>
+            
+            <!-- quantity -->
+            <div class="form-group">
+                <input autocomplete="off" autofocus class="form-control" name="quantity" placeholder="Quantity" type="text"/>
+            </div>
+            
+            <!-- submit button -->
+            <div class="form-group">
+                <button class="btn btn-default" type="submit">Sell Stock</button>
+            </div>
+        </fieldset>
+    </form>
+{% endblock %}

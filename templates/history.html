@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+    <!-- bought and sold alerts -->
+    {% if bought %}
+    <div class="alert alert-info" role="alert">
+        Bought!
+    </div>
+    {% endif %}
+    
+    {% if sold %}
+    <div class="alert alert-info" role="alert">
+        Sold!
+    </div>
+    {% endif %}
+
+    <table class="table table-striped">
+        <tr>
+            <th>Buy/Sell</th>
+            <th>Symbol</th>
+            <th>Name</th>
+            <th>Shares</th>
+            <th>Price</th>
+            <th>Date</th>
+        </tr>
+
+        {% for transaction in transactions %} 
+        <tr>
+            <td>
+                {{ transaction["type"] }}
+            </td>
+            <td>
+                {{ transaction["symbol"] }}
+            </td>
+            <td>
+                {{ transaction["name"] }}
+            </td>
+            <td>
+                {{ transaction["quantity"] }}
+            </td>
+            <td>
+                {{ transaction["price"] }}
+            </td>
+            <td>
+                {{ transaction["date"] }}
+            </td>
+        </tr>
+        {% endfor %}
+{% endblock %}

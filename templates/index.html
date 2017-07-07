@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+    <!-- bought and sold alerts -->
+    {% if bought %}
+    <div class="alert alert-info" role="alert">
+        Bought!
+    </div>
+    {% endif %}
+    
+    {% if sold %}
+    <div class="alert alert-info" role="alert">
+        Sold!
+    </div>
+    {% endif %}
+
+    <table class="table table-striped">
+        <tr>
+            <th>Symbol</th>
+            <th>Name</th>
+            <th>Shares</th>
+            <th>Share Price</th>
+            <th>Total Value</th>
+        </tr>
+
+        {% for stock in stocks %} 
+        <tr>
+            <td>
+                {{ stock["symbol"] }}
+            </td>
+            <td>
+                {{ stock["name"] }}
+            </td>
+            <td>
+                {{ stock["quantity"] }}
+            </td>
+            <td>
+                {{ stock["price"] }}
+            </td>
+            <td>
+                {{ stock["total_price"] }}
+            </td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td>
+                CASH
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                {{ user_cash }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Portfolio Value
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                {{ portfolio_val }}
+            </td>
+        </tr>
+    </table>
+{% endblock %}

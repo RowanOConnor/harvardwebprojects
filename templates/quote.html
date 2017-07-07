@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Get Quotes
+{% endblock %}
+
+{% block main %}
+    <form action="{{ url_for('quote') }}" method="post">
+        <fieldset>
+            <!-- reminder -->
+            {% if reminder %}
+            <div class="form-group">
+                Check to make sure you are entering a valid symbol.
+            </div>
+            {% endif %}
+            
+            <!-- information -->
+            {% if value and name and symbol %}
+            <div class="form-group">
+                Company: {{ name }}<br>
+                Stock Symbol: {{ symbol }}<br>
+                Shares valued at ${{ price }} each.
+            </div>
+            {% endif %}
+            
+            <!-- symbol -->
+            <div class="form-group">
+                <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Stock Symbol" type="text"/>
+            </div>
+            
+            <!-- submit button -->
+            <div class="form-group">
+                <button class="btn btn-default" type="submit">Get Quote</button>
+            </div>
+        </fieldset>
+    </form>
+{% endblock %}
